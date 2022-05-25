@@ -1,11 +1,19 @@
 import React, { useState } from 'react'
-import { addForm } from '../features/postSlice'
-import { useDispatch } from 'react-redux'
-import { nanoid } from '@reduxjs/toolkit'
+import { addForm } from '../features/posts/postSlice'
+import { useDispatch, useSelector } from 'react-redux'
 const AddPostForm = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [userId, setUserId] = useState('')
   const dispatch = useDispatch()
+  const users = useSelector((state) => state.users)
+
+  const canSave = title && content && userId
+  const usersOptions = users.map((user) => (
+    <option key={user.id} value={user.id}>
+      {user.name}
+    </option>
+  ))
   return (
     <section>
       <h2>添加新帖子</h2>
@@ -20,6 +28,17 @@ const AddPostForm = () => {
             setTitle(e.target.value)
           }}
         />
+        <label htmlFor="postAuthor">Author:</label>
+        <select
+          id="postAuthor"
+          value={userId}
+          onChange={(e) => {
+            setUserId(e.target.value)
+          }}
+        >
+          <option value=""></option>
+          {usersOptions}
+        </select>
         <label htmlFor="postContent">内容：</label>
         <textarea
           id="postContent"
@@ -32,15 +51,9 @@ const AddPostForm = () => {
         <button
           type="button"
           onClick={() => {
-            dispatch({
-              ...addForm(),
-              payload: {
-                id: nanoid(),
-                title: title,
-                content: content,
-              },
-            })
+            dispatch(addForm(title, content, userId))
           }}
+          disabled={!canSave}
         >
           保存帖子
         </button>
